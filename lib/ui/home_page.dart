@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/detail_page.dart';
-import 'package:restaurant_app/favorite_page.dart';
+import 'package:restaurant_app/ui/detail_page.dart';
+import 'package:restaurant_app/ui/favorite_page.dart';
 import 'package:restaurant_app/models/restaurant.dart';
-import 'package:restaurant_app/platform_widget.dart';
-import 'package:restaurant_app/styles.dart';
+import 'package:restaurant_app/widgets/platform_widget.dart';
+import 'package:restaurant_app/common/styles.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/home_page';

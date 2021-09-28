@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/home_page.dart';
-import 'package:restaurant_app/styles.dart';
+import 'package:restaurant_app/ui/home_page.dart';
+import 'package:restaurant_app/common/styles.dart';
 
 class SplashPage extends StatelessWidget {
   static const routeName = '/splash_page';

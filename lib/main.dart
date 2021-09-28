@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:restaurant_app/detail_page.dart';
-import 'package:restaurant_app/favorite_page.dart';
-import 'package:restaurant_app/home_page.dart';
+import 'package:restaurant_app/ui/detail_page.dart';
+import 'package:restaurant_app/ui/favorite_page.dart';
+import 'package:restaurant_app/ui/home_page.dart';
 import 'package:restaurant_app/models/restaurant.dart';
-import 'package:restaurant_app/splash_page.dart';
-import 'package:restaurant_app/styles.dart';
+import 'package:restaurant_app/ui/splash_page.dart';
+import 'package:restaurant_app/common/styles.dart';
 
 void main() {
   runApp(const MyApp());

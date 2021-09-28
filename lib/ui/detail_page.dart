@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_app/models/restaurant.dart';
-import 'package:restaurant_app/platform_widget.dart';
-import 'package:restaurant_app/styles.dart';
+import 'package:restaurant_app/widgets/platform_widget.dart';
+import 'package:restaurant_app/common/styles.dart';
 
 class RestaurantDetailPage extends StatefulWidget {
   static const routeName = '/restaurant_detail';

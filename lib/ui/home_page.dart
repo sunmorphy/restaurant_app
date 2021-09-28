@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
 import 'package:restaurant_app/models/restaurant.dart';
+import 'package:restaurant_app/ui/splash_page.dart';
 import 'package:restaurant_app/widgets/platform_widget.dart';
 import 'package:restaurant_app/common/styles.dart';
 
@@ -123,9 +124,34 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Exit'),
+            content: const Text('Do you want to exit an App'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context)
+                    .pushReplacementNamed(SplashPage.routeName),
+                child: const Text('Yes'),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
+
   Widget _buildAndroid(BuildContext context) {
-    return Scaffold(
-      body: _buildHome(context),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: _buildHome(context),
+      ),
     );
   }
 

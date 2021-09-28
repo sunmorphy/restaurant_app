@@ -56,29 +56,31 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
         body: ListView(
           padding: const EdgeInsets.only(left: 20.0, top: 20.0, right: 20.0),
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: SizedBox(
-                width: 90,
-                height: 30,
-                child: Card(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Card(
                   color: primaryColor,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)),
-                  child: Center(
-                      child: Row(
-                    children: [
-                      const Icon(
-                        Icons.star,
-                        size: 16,
-                      ),
-                      Text(widget.restaurants.rating.toString(),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16.0)),
-                    ],
-                  )),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.star,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 2.0),
+                        Text(widget.restaurants.rating.toString(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 16.0)),
+                        const SizedBox(width: 3.0),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.only(top: 30.0),

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
-import 'package:restaurant_app/ui/favorite_page.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/widgets/platform_widget.dart';
 import 'package:restaurant_app/common/styles.dart';
@@ -47,17 +46,6 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              const Spacer(),
-              IconButton(
-                icon: Icon(
-                  Icons.favorite,
-                  color: Colors.red.shade400,
-                ),
-                onPressed: () {
-                  Navigator.pushNamed(context, FavoritePage.routeName,
-                      arguments: _buildList(context));
-                },
-              )
             ],
           ),
           const SizedBox(height: 10.0),

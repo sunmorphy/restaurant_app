@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
-import 'package:restaurant_app/ui/favorite_page.dart';
 import 'package:restaurant_app/ui/home_page.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/ui/splash_page.dart';
@@ -40,7 +39,6 @@ class MyApp extends StatelessWidget {
               restaurants:
                   ModalRoute.of(context)?.settings.arguments as Restaurants,
             ),
-        FavoritePage.routeName: (context) => const FavoritePage(),
       },
     );
   }

@@ -1,32 +1,4 @@
 import 'dart:convert';
-/*
-class Restaurant {
-  late List<Restaurants> restaurants;
-
-  Restaurant({required this.restaurants});
-
-  Restaurant.fromJson(Map<String, dynamic> json) {
-    if (json['restaurants'] != null) {
-      restaurants = <Restaurants>[];
-      json['restaurants'].forEach((v) {
-        restaurants.add(Restaurants.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['restaurants'] = restaurants.map((v) => v.toJson()).toList();
-    return data;
-  }
-}
-
-class Favorited {
-  late List<Restaurants> restaurants;
-
-  Favorited({required this.restaurants}); 
-}
-*/
 
 class Restaurants {
   late String id;

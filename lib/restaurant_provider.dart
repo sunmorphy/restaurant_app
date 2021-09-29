@@ -6,10 +6,13 @@ import 'package:restaurant_app/models/restaurant.dart';
 class RestaurantProvider extends ChangeNotifier {
   final ApiService apiService;
 
-  RestaurantProvider({required this.apiService});
+  // RestaurantProvider({required this.apiService}): assert(_fetchAllRestaurant);
+  RestaurantProvider({required this.apiService}) {
+    _fetchAllRestaurant();
+  }
 
   late Restaurants _restaurants;
-  late String _message = '';
+  String _message = '';
   late ResultState _state;
 
   String get message => _message;

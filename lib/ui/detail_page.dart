@@ -54,7 +54,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                           background: Stack(children: [
                             SizedBox.expand(
                               child: Image.network(
-                                data.restaurant.pictureId,
+                                'https://restaurant-api.dicoding.dev/images/medium/${data.restaurant.pictureId}',
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -283,7 +283,69 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                   }),
                                 ),
                               ),
-                              const SizedBox(height: 20.0)
+                              const SizedBox(height: 30.0),
+                              const Text(
+                                'Reviews',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 20.0,
+                              ),
+                              ListView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount:
+                                    data.restaurant.customerReviews.length,
+                                itemBuilder: (context, index) {
+                                  return Card(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0)),
+                                    child: ListView(
+                                      padding: const EdgeInsets.all(8.0),
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      shrinkWrap: true,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              data.restaurant
+                                                  .customerReviews[index].name,
+                                              style: const TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 18.0,
+                                                  fontWeight: FontWeight.w700),
+                                            ),
+                                            const Spacer(),
+                                            Text(
+                                                data
+                                                    .restaurant
+                                                    .customerReviews[index]
+                                                    .date,
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 16.0,
+                                                ))
+                                          ],
+                                        ),
+                                        const SizedBox(height: 10.0),
+                                        Text(
+                                            data.restaurant
+                                                .customerReviews[index].review,
+                                            style: const TextStyle(
+                                                color: Colors.black54,
+                                                fontSize: 16.0))
+                                      ],
+                                    ),
+                                  );
+                                },
+                              )
                             ]),
                       )
                     ],

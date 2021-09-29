@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant_app/common/result_state.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
@@ -7,7 +8,6 @@ import 'package:restaurant_app/restaurant_provider.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 // import 'package:restaurant_app/ui/favorite_page.dart';
-import 'package:restaurant_app/ui/splash_page.dart';
 import 'package:restaurant_app/widgets/platform_widget.dart';
 import 'package:restaurant_app/common/styles.dart';
 
@@ -22,13 +22,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late Future<Restaurants> _restaurant;
+  /*late Future<Restaurants> _restaurant;
 
   @override
   void initState() {
     super.initState();
     _restaurant = ApiService().fetchList();
-  }
+  }*/
 
   Widget _buildHome(BuildContext context) {
     return Scaffold(
@@ -59,17 +59,19 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-              ), /*
+              ),
               const Spacer(),
               IconButton(
-                icon: const Icon(
-                  Icons.favorite
-                ),
-                onPressed: () {
-                  Navigator.pushNamed(context, FavoritePage.routeName,
-            arguments: List<restaurants>);
-                },
-              )*/
+                icon: const Icon(Icons.favorite),
+                onPressed: () {},
+              ),
+              const SizedBox(
+                width: 8.0,
+              ),
+              IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {},
+              )
             ],
           ),
           const SizedBox(height: 10.0),
@@ -163,15 +165,15 @@ class _HomePageState extends State<HomePage> {
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       leading: SizedBox(
-        width: 110,
-        height: 120,
+        width: 120,
+        height: 100,
         child: Hero(
           tag: restaurant.pictureId,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10.0),
             child: SizedBox.expand(
               child: Image.network(
-                restaurant.pictureId,
+                'https://restaurant-api.dicoding.dev/images/medium/${restaurant.pictureId}',
                 fit: BoxFit.cover,
               ),
             ),
@@ -202,8 +204,8 @@ class _HomePageState extends State<HomePage> {
                 child: const Text('No'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(context)
-                    .pushReplacementNamed(SplashPage.routeName),
+                onPressed: () =>
+                    SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
                 child: const Text('Yes'),
               ),
             ],

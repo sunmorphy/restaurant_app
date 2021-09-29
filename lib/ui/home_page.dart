@@ -1,7 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:restaurant_app/common/result_state.dart';
+import 'package:restaurant_app/data/api/api_service.dart';
+import 'package:restaurant_app/restaurant_provider.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
 import 'package:restaurant_app/models/restaurant.dart';
+// import 'package:restaurant_app/ui/favorite_page.dart';
 import 'package:restaurant_app/ui/splash_page.dart';
 import 'package:restaurant_app/widgets/platform_widget.dart';
 import 'package:restaurant_app/common/styles.dart';
@@ -17,6 +22,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late Future<Restaurants> _restaurant;
+
+  @override
+  void initState() {
+    super.initState();
+    _restaurant = ApiService().fetchList();
+  }
+
   Widget _buildHome(BuildContext context) {
     return Scaffold(
         body: SingleChildScrollView(
@@ -46,7 +59,17 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-              ),
+              ), /*
+              const Spacer(),
+              IconButton(
+                icon: const Icon(
+                  Icons.favorite
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, FavoritePage.routeName,
+            arguments: List<restaurants>);
+                },
+              )*/
             ],
           ),
           const SizedBox(height: 10.0),
@@ -72,10 +95,52 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildList(BuildContext context) {
-    return FutureBuilder<String>(
-      future: DefaultAssetBundle.of(context)
-          .loadString('assets/local_restaurant.json'),
-      builder: (context, snapshot) {
+    return Consumer<RestaurantProvider>(builder: (context, state, _) {
+      if (state.state == ResultState.Loading) {
+        return const Center(child: CircularProgressIndicator());
+      } else if (state.state == ResultState.HasData) {
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: state.result.restaurants.length,
+          itemBuilder: (context, index) {
+            var restaurant = state.result.restaurants[index];
+            return _buildItemList(context, restaurant);
+          },
+        );
+      } else if (state.state == ResultState.NoData) {
+        return Center(child: Text(state.message));
+      } else if (state.state == ResultState.Error) {
+        return Center(child: Text(state.message));
+      } else {
+        return const Center(child: Text(''));
+      }
+    });
+    /*return FutureBuilder(
+      future: _restaurant,
+      builder: (context, AsyncSnapshot<Restaurants> snapshot) {
+        var state = snapshot.connectionState;
+
+        if (state != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        } else {
+          if (snapshot.hasData) {
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: snapshot.data?.restaurants.length,
+              itemBuilder: (context, index) {
+                var restaurant = snapshot.data?.restaurants[index];
+                return _buildItemList(context, restaurant!);
+              },
+            );
+          } else if (snapshot.hasError) {
+            return Center(child: Text(snapshot.error.toString()));
+          } else {
+            return const Text('');
+          }
+        }
+        /*
         final List<Restaurants> restaurants = parseRestaurants(snapshot.data);
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
@@ -88,11 +153,12 @@ class _HomePageState extends State<HomePage> {
             return _buildItemList(context, restaurants[index]);
           },
         );
+        */
       },
-    );
+    );*/
   }
 
-  Widget _buildItemList(BuildContext context, Restaurants restaurants) {
+  Widget _buildItemList(BuildContext context, RestaurantElement restaurant) {
     return ListTile(
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
@@ -100,12 +166,12 @@ class _HomePageState extends State<HomePage> {
         width: 110,
         height: 120,
         child: Hero(
-          tag: restaurants.pictureId,
+          tag: restaurant.pictureId,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10.0),
             child: SizedBox.expand(
               child: Image.network(
-                restaurants.pictureId,
+                restaurant.pictureId,
                 fit: BoxFit.cover,
               ),
             ),
@@ -113,13 +179,13 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       title: Text(
-        restaurants.name,
+        restaurant.name,
         style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
       ),
-      subtitle: Text(restaurants.city),
+      subtitle: Text(restaurant.city),
       onTap: () {
         Navigator.pushNamed(context, RestaurantDetailPage.routeName,
-            arguments: restaurants);
+            arguments: restaurant.id);
       },
     );
   }
@@ -163,6 +229,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformWidget(androidBuilder: _buildAndroid, iosBuilder: _buildIos);
+    return ChangeNotifierProvider<RestaurantProvider>(
+        create: (_) => RestaurantProvider(apiService: ApiService()),
+        child: PlatformWidget(
+            androidBuilder: _buildAndroid, iosBuilder: _buildIos));
   }
 }

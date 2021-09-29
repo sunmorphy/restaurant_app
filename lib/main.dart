@@ -19,7 +19,6 @@ class MyApp extends StatelessWidget {
       title: 'Restaurant App',
       theme: ThemeData(
           primaryColor: primaryColor,
-          accentColor: secondaryColor,
           scaffoldBackgroundColor: Colors.white,
           visualDensity: VisualDensity.adaptivePlatformDensity,
           textTheme: myTextTheme,
@@ -29,15 +28,16 @@ class MyApp extends StatelessWidget {
           elevatedButtonTheme: ElevatedButtonThemeData(
               style: ElevatedButton.styleFrom(
             textStyle: const TextStyle(),
-          ))),
+          )),
+          colorScheme:
+              ColorScheme.fromSwatch().copyWith(secondary: secondaryColor)),
       initialRoute: SplashPage.routeName,
       routes: {
         SplashPage.routeName: (context) => const SplashPage(),
         HomePage.routeName: (context) => HomePage(
             username: ModalRoute.of(context)?.settings.arguments as String),
         RestaurantDetailPage.routeName: (context) => RestaurantDetailPage(
-              restaurants:
-                  ModalRoute.of(context)?.settings.arguments as Restaurants,
+              id: ModalRoute.of(context)?.settings.arguments as String,
             ),
       },
     );

@@ -7,6 +7,7 @@ import 'package:restaurant_app/data/api/api_service.dart';
 import 'package:restaurant_app/restaurant_provider.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
 import 'package:restaurant_app/models/restaurant.dart';
+import 'package:restaurant_app/ui/search_page.dart';
 // import 'package:restaurant_app/ui/favorite_page.dart';
 import 'package:restaurant_app/widgets/platform_widget.dart';
 import 'package:restaurant_app/common/styles.dart';
@@ -62,7 +63,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const Spacer(),
               IconButton(
-                icon: const Icon(Icons.favorite),
+                icon: Icon(Icons.favorite, color: Colors.red.shade400),
                 onPressed: () {},
               ),
               const SizedBox(
@@ -70,7 +71,9 @@ class _HomePageState extends State<HomePage> {
               ),
               IconButton(
                 icon: const Icon(Icons.search),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, SearchPage.routeName);
+                },
               )
             ],
           ),

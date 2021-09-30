@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
 import 'package:restaurant_app/ui/home_page.dart';
 import 'package:restaurant_app/models/restaurant.dart';
+import 'package:restaurant_app/ui/search_page.dart';
 import 'package:restaurant_app/ui/splash_page.dart';
 import 'package:restaurant_app/common/styles.dart';
 
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         SplashPage.routeName: (context) => const SplashPage(),
         HomePage.routeName: (context) => HomePage(
             username: ModalRoute.of(context)?.settings.arguments as String),
+        SearchPage.routeName: (context) => const SearchPage(),
         RestaurantDetailPage.routeName: (context) => RestaurantDetailPage(
               id: ModalRoute.of(context)?.settings.arguments as String,
             ),

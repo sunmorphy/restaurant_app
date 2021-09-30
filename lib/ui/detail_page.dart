@@ -340,7 +340,8 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                                 .customerReviews[index].review,
                                             style: const TextStyle(
                                                 color: Colors.black54,
-                                                fontSize: 16.0))
+                                                fontSize: 16.0)),
+                                        const SizedBox(height: 30.0),
                                       ],
                                     ),
                                   );

@@ -1,45 +1,44 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:restaurant_app/common/result_state.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
-import 'package:restaurant_app/models/restaurant_search.dart';
+import 'package:restaurant_app/models/restaurant.dart';
 
-class RestaurantSearchProvider extends ChangeNotifier {
+class RestaurantFavoriteProvider extends ChangeNotifier {
   final ApiService apiService;
 
   // RestaurantProvider({required this.apiService}): assert(_fetchAllRestaurant);
-  RestaurantSearchProvider({required this.apiService, required this.query}) {
-    _fetchRestaurant();
+  RestaurantFavoriteProvider({required this.apiService}) {
+    _fetchFavoriteRestaurant();
   }
 
-  late RestaurantSearch _restaurantsSearch;
-  late ResultState _state;
+  late Restaurants _restaurants;
   String _message = '';
-  String query = '';
+  late ResultState _state;
 
   String get message => _message;
 
-  RestaurantSearch get result => _restaurantsSearch;
+  Restaurants get result => _restaurants;
 
   ResultState get state => _state;
 
-  Future<dynamic> _fetchRestaurant() async {
+  Future<dynamic> _fetchFavoriteRestaurant() async {
     try {
       _state = ResultState.Loading;
       notifyListeners();
-      final searchRestaurant = await apiService.fetchByQuery(query);
-      if (searchRestaurant.restaurants.isEmpty) {
+      final restaurants = await apiService.fetchFavorite();
+      if (restaurants.restaurants.isEmpty) {
         _state = ResultState.NoData;
         notifyListeners();
         return _message = 'Empty Data';
       } else {
         _state = ResultState.HasData;
         notifyListeners();
-        return _restaurantsSearch = searchRestaurant;
+        return _restaurants = restaurants;
       }
     } catch (e) {
       _state = ResultState.Error;
       notifyListeners();
-      return _message = 'Error: $e';
+      return _message = 'Error --> $e';
     }
   }
 }

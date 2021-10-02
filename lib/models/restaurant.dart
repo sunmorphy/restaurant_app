@@ -123,17 +123,18 @@ Restaurants restaurantFromJson(String str) =>
 String restaurantToJson(Restaurants data) => json.encode(data.toJson());
 
 class Restaurants {
-  Restaurants({
-    required this.error,
-    required this.message,
-    required this.count,
-    required this.restaurants,
-  });
+  Restaurants(
+      {required this.error,
+      required this.message,
+      required this.count,
+      required this.restaurants,
+      required this.isFavorite});
 
   final bool error;
   final String message;
   final int count;
   final List<RestaurantElement> restaurants;
+  final bool isFavorite;
 
   factory Restaurants.fromJson(Map<String, dynamic> json) => Restaurants(
         error: json["error"],
@@ -141,6 +142,7 @@ class Restaurants {
         count: json["count"],
         restaurants: List<RestaurantElement>.from(
             json["restaurants"].map((x) => RestaurantElement.fromJson(x))),
+        isFavorite: false,
       );
 
   Map<String, dynamic> toJson() => {

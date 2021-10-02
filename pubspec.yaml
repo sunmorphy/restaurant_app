@@ -37,8 +37,11 @@ dependencies:
   google_fonts: ^2.1.0
   http: ^0.13.3
   provider: ^6.0.1
+  floor: ^1.2.0
 
 dev_dependencies:
+  floor_generator: ^1.2.0
+  build_runner: ^2.1.2
   flutter_test:
     sdk: flutter
 

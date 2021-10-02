@@ -4,11 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:restaurant_app/common/result_state.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
-import 'package:restaurant_app/restaurant_provider.dart';
+import 'package:restaurant_app/provider/restaurant_provider.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/ui/search_page.dart';
-// import 'package:restaurant_app/ui/favorite_page.dart';
 import 'package:restaurant_app/widgets/platform_widget.dart';
 import 'package:restaurant_app/common/styles.dart';
 
@@ -23,14 +22,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  /*late Future<Restaurants> _restaurant;
-
-  @override
-  void initState() {
-    super.initState();
-    _restaurant = ApiService().fetchList();
-  }*/
-
   Widget _buildHome(BuildContext context) {
     return Scaffold(
         body: SingleChildScrollView(
@@ -121,46 +112,6 @@ class _HomePageState extends State<HomePage> {
         return const Center(child: Text(''));
       }
     });
-    /*return FutureBuilder(
-      future: _restaurant,
-      builder: (context, AsyncSnapshot<Restaurants> snapshot) {
-        var state = snapshot.connectionState;
-
-        if (state != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        } else {
-          if (snapshot.hasData) {
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: snapshot.data?.restaurants.length,
-              itemBuilder: (context, index) {
-                var restaurant = snapshot.data?.restaurants[index];
-                return _buildItemList(context, restaurant!);
-              },
-            );
-          } else if (snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()));
-          } else {
-            return const Text('');
-          }
-        }
-        /*
-        final List<Restaurants> restaurants = parseRestaurants(snapshot.data);
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: restaurants.length,
-          itemBuilder: (context, index) {
-            return _buildItemList(context, restaurants[index]);
-          },
-        );
-        */
-      },
-    );*/
   }
 
   Widget _buildItemList(BuildContext context, RestaurantElement restaurant) {

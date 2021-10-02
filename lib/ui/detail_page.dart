@@ -11,6 +11,7 @@ class RestaurantDetailPage extends StatefulWidget {
   static const routeName = '/restaurant_detail';
   // final Restaurant restaurant;
   // final bool isFavorite;
+
   final String id;
 
   const RestaurantDetailPage({Key? key, required this.id}) : super(key: key);
@@ -21,6 +22,7 @@ class RestaurantDetailPage extends StatefulWidget {
 
 class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   late Future<RestaurantDetail> _restaurantDetail;
+  bool isFavorite = false;
 
   @override
   void initState() {
@@ -99,6 +101,19 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(fontSize: 16.0)),
                                   const SizedBox(width: 3.0),
+                                  const Spacer(),
+                                  IconButton(
+                                    icon: Icon(
+                                      isFavorite
+                                          ? Icons.favorite_border
+                                          : Icons.favorite,
+                                      size: 24.0,
+                                      color: Colors.red.shade400,
+                                    ),
+                                    onPressed: () {
+                                      isFavorite = !isFavorite;
+                                    },
+                                  )
                                 ],
                               ),
                             ),
@@ -330,7 +345,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                                     .date,
                                                 style: const TextStyle(
                                                   color: Colors.grey,
-                                                  fontSize: 16.0,
+                                                  fontSize: 12.0,
                                                 ))
                                           ],
                                         ),
@@ -341,14 +356,14 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                             style: const TextStyle(
                                                 color: Colors.black54,
                                                 fontSize: 16.0)),
-                                        const SizedBox(height: 30.0),
                                       ],
                                     ),
                                   );
                                 },
                               )
                             ]),
-                      )
+                      ),
+                      const SizedBox(height: 30.0),
                     ],
                   ),
                 );

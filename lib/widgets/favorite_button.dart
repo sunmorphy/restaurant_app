@@ -1,15 +1,14 @@
-/*import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 
 class FavoriteButton extends StatelessWidget {
-  final List<Restaurants> favoriteRestaurant;
-  final Restaurants favoriteRestaurants;
-  final bool isFavorite;
+  // final List<Restaurants> favoriteRestaurant;
+  // final Restaurants favoriteRestaurants;
+  bool isFavorite;
+  late final List<RestaurantElement> _search = [];
   // final void onClick;
 
-  const FavoriteButton(
-      {Key? key, required this.favoriteRestaurants, required this.isFavorite, required this.onClick})
-      : super(key: key);
+  FavoriteButton({Key? key, required this.isFavorite}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,21 +34,17 @@ class FavoriteButton extends StatelessWidget {
     */
     return IconButton(
       icon: Icon(
-        favoriteRestaurants.isFavorite
-            ? Icons.favorite_border
-            : Icons.favorite,
+        isFavorite ? Icons.favorite_border : Icons.favorite,
         size: 24.0,
         color: Colors.red.shade400,
       ),
-      onPressed: onClick,
+      onPressed: () {
+        isFavorite = !isFavorite;
+      },
     );
   }
-
-  void onClick() {
-    setState
-  }
 }
-
+/*
 class _FavoriteButtonState extends State<FavoriteButton> {
   @override
   Widget build(BuildContext context) {

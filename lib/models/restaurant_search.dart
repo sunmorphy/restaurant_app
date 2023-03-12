@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final restaurantSearch = restaurantSearchFromJson(jsonString);
-
 import 'dart:convert';
 
 RestaurantSearch restaurantSearchFromJson(String str) =>
@@ -25,14 +21,17 @@ class RestaurantSearch {
       RestaurantSearch(
         error: json["error"],
         founded: json["founded"],
-        restaurants: List<RestaurantSearchElement>.from(json["restaurants"]
-            .map((x) => RestaurantSearchElement.fromJson(x))),
+        restaurants: List<RestaurantSearchElement>.from(
+          json["restaurants"].map((x) => RestaurantSearchElement.fromJson(x)),
+        ),
       );
 
   Map<String, dynamic> toJson() => {
         "error": error,
         "founded": founded,
-        "restaurants": List<dynamic>.from(restaurants.map((x) => x.toJson())),
+        "restaurants": List<dynamic>.from(
+          restaurants.map((x) => x.toJson()),
+        ),
       };
 }
 

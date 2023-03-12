@@ -6,6 +6,7 @@ class FavoriteButton extends StatelessWidget {
   // final Restaurants favoriteRestaurants;
   bool isFavorite;
   late final List<RestaurantElement> _search = [];
+
   // final void onClick;
 
   FavoriteButton({Key? key, required this.isFavorite}) : super(key: key);

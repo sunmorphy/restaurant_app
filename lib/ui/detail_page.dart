@@ -1,16 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/data/api/api_service.dart';
-import 'package:restaurant_app/models/restaurant.dart';
-import 'package:restaurant_app/models/restaurant_detail.dart';
-import 'package:restaurant_app/widgets/favorite_button.dart';
-import 'package:restaurant_app/widgets/platform_widget.dart';
+import 'package:provider/provider.dart';
 import 'package:restaurant_app/common/styles.dart';
+import 'package:restaurant_app/data/api/api_service.dart';
+import 'package:restaurant_app/provider/restaurant_detail_provider.dart';
+import 'package:restaurant_app/widgets/platform_widget.dart';
+
+import '../common/result_state.dart';
+import '../widgets/show_error_widget.dart';
 
 class RestaurantDetailPage extends StatefulWidget {
   static const routeName = '/restaurant_detail';
-  // final Restaurant restaurant;
-  // final bool isFavorite;
 
   final String id;
 
@@ -21,373 +21,41 @@ class RestaurantDetailPage extends StatefulWidget {
 }
 
 class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
-  late Future<RestaurantDetail> _restaurantDetail;
   bool isFavorite = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _restaurantDetail = ApiService().fetchDetail(widget.id);
-  }
-
   Widget _buildDetail(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder(
-          future: _restaurantDetail,
-          builder: (context, AsyncSnapshot<RestaurantDetail> snapshot) {
-            var state = snapshot.connectionState;
-
-            if (state != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
-            } else {
-              if (snapshot.hasData) {
-                var data = snapshot.data;
-                return NestedScrollView(
-                  headerSliverBuilder: (context, isScrolled) {
-                    return [
-                      SliverAppBar(
-                        pinned: true,
-                        expandedHeight: 300,
-                        title: Text(data!.restaurant.name,
-                            style: const TextStyle(color: Colors.white)),
-                        centerTitle: true,
-                        backgroundColor: secondaryColor,
-                        flexibleSpace: FlexibleSpaceBar(
-                          background: Stack(children: [
-                            SizedBox.expand(
-                              child: Image.network(
-                                'https://restaurant-api.dicoding.dev/images/medium/${data.restaurant.pictureId}',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: <Color>[
-                                    Colors.black.withOpacity(0.8),
-                                    Colors.transparent
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ]),
-                        ),
-                      )
-                    ];
-                  },
-                  body: ListView(
-                    padding: const EdgeInsets.only(
-                        left: 20.0, top: 20.0, right: 20.0),
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Card(
-                            color: primaryColor,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.0)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.star,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 2.0),
-                                  Text(data!.restaurant.rating.toString(),
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 16.0)),
-                                  const SizedBox(width: 3.0),
-                                  const Spacer(),
-                                  IconButton(
-                                    icon: Icon(
-                                      isFavorite
-                                          ? Icons.favorite_border
-                                          : Icons.favorite,
-                                      size: 24.0,
-                                      color: Colors.red.shade400,
-                                    ),
-                                    onPressed: () {
-                                      isFavorite = !isFavorite;
-                                    },
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30.0),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Description',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(
-                                height: 20.0,
-                              ),
-                              Text(
-                                data.restaurant.description,
-                                style: const TextStyle(
-                                    color: Colors.grey, fontSize: 16.0),
-                              ),
-                              const SizedBox(height: 30.0),
-                              const Text(
-                                'Foods',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(
-                                height: 20.0,
-                              ),
-                              SizedBox(
-                                height: 150,
-                                width: double.infinity,
-                                child: GridView.count(
-                                  crossAxisCount: 1,
-                                  scrollDirection: Axis.horizontal,
-                                  children: List.generate(
-                                      data.restaurant.menus.foods.length,
-                                      (index) {
-                                    return Card(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(30.0)),
-                                      child: SizedBox(
-                                        width: 150.0,
-                                        height: 150.0,
-                                        child: Stack(
-                                            fit: StackFit.expand,
-                                            children: [
-                                              ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          30.0),
-                                                  child: Image.asset(
-                                                    "assets/images/food.jpg",
-                                                    fit: BoxFit.cover,
-                                                  )),
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(30.0),
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    gradient: LinearGradient(
-                                                        begin: Alignment
-                                                            .bottomCenter,
-                                                        end:
-                                                            Alignment.topCenter,
-                                                        colors: <Color>[
-                                                          Colors.black
-                                                              .withOpacity(0.8),
-                                                          Colors.transparent
-                                                        ],
-                                                        tileMode:
-                                                            TileMode.repeated),
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Align(
-                                                  alignment:
-                                                      Alignment.bottomCenter,
-                                                  child: Text(
-                                                    data.restaurant.menus
-                                                        .foods[index].name,
-                                                    textAlign: TextAlign.center,
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 18.0),
-                                                  ),
-                                                ),
-                                              )
-                                            ]),
-                                      ),
-                                    );
-                                  }),
-                                ),
-                              ),
-                              const SizedBox(height: 30.0),
-                              const Text(
-                                'Drinks',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(
-                                height: 20.0,
-                              ),
-                              SizedBox(
-                                height: 150.0,
-                                width: double.infinity,
-                                child: GridView.count(
-                                  crossAxisCount: 1,
-                                  scrollDirection: Axis.horizontal,
-                                  children: List.generate(
-                                      data.restaurant.menus.drinks.length,
-                                      (index) {
-                                    return Card(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(30.0)),
-                                      child: SizedBox(
-                                        width: 150.0,
-                                        height: 150.0,
-                                        child: Stack(
-                                            fit: StackFit.expand,
-                                            children: [
-                                              ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          30.0),
-                                                  child: Image.asset(
-                                                    "assets/images/drink.jpg",
-                                                    fit: BoxFit.cover,
-                                                  )),
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(30.0),
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    gradient: LinearGradient(
-                                                      begin: Alignment
-                                                          .bottomCenter,
-                                                      end: Alignment.topCenter,
-                                                      colors: <Color>[
-                                                        Colors.black
-                                                            .withOpacity(0.8),
-                                                        Colors.transparent
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Align(
-                                                  alignment:
-                                                      Alignment.bottomCenter,
-                                                  child: Text(
-                                                      data.restaurant.menus
-                                                          .drinks[index].name,
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style: const TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 18.0)),
-                                                ),
-                                              )
-                                            ]),
-                                      ),
-                                    );
-                                  }),
-                                ),
-                              ),
-                              const SizedBox(height: 30.0),
-                              const Text(
-                                'Reviews',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(
-                                height: 20.0,
-                              ),
-                              ListView.builder(
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                itemCount:
-                                    data.restaurant.customerReviews.length,
-                                itemBuilder: (context, index) {
-                                  return Card(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0)),
-                                    child: ListView(
-                                      padding: const EdgeInsets.all(8.0),
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      shrinkWrap: true,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              data.restaurant
-                                                  .customerReviews[index].name,
-                                              style: const TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 18.0,
-                                                  fontWeight: FontWeight.w700),
-                                            ),
-                                            const Spacer(),
-                                            Text(
-                                                data
-                                                    .restaurant
-                                                    .customerReviews[index]
-                                                    .date,
-                                                style: const TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 12.0,
-                                                ))
-                                          ],
-                                        ),
-                                        const SizedBox(height: 10.0),
-                                        Text(
-                                            data.restaurant
-                                                .customerReviews[index].review,
-                                            style: const TextStyle(
-                                                color: Colors.black54,
-                                                fontSize: 16.0)),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              )
-                            ]),
-                      ),
-                      const SizedBox(height: 30.0),
-                    ],
+    return Consumer<RestaurantDetailProvider>(
+      builder: (
+        context,
+        state,
+        _,
+      ) {
+        if (state.state == ResultState.Loading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (state.state == ResultState.HasData) {
+          var data = state.result;
+          return NestedScrollView(
+            headerSliverBuilder: (context, isScrolled) {
+              return [
+                SliverAppBar(
+                  pinned: true,
+                  expandedHeight: 300,
+                  title: Text(
+                    data.restaurant.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
-                );
-              } else if (snapshot.hasError) {
-                return Center(child: Text(snapshot.error.toString()));
-              } else {
-                return const Text('');
-              }
-            } /*
-            return NestedScrollView(
-              headerSliverBuilder: (context, isScrolled) {
-                return [
-                  SliverAppBar(
-                    pinned: true,
-                    expandedHeight: 300,
-                    title: Text(widget.restaurants.name,
-                        style: const TextStyle(color: Colors.white)),
-                    centerTitle: true,
-                    backgroundColor: secondaryColor,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: Stack(children: [
+                  centerTitle: true,
+                  backgroundColor: secondaryColor,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Stack(
+                      children: [
                         SizedBox.expand(
                           child: Image.network(
-                            widget.restaurants.pictureId,
+                            'https://restaurant-api.dicoding.dev/images/medium/${data.restaurant.pictureId}',
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -398,174 +66,141 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                               end: Alignment.bottomCenter,
                               colors: <Color>[
                                 Colors.black.withOpacity(0.8),
-                                Colors.transparent
+                                Colors.transparent,
                               ],
                             ),
                           ),
                         ),
-                      ]),
+                      ],
                     ),
-                  )
-                ];
-              },
-              body: ListView(
-                padding:
-                    const EdgeInsets.only(left: 20.0, top: 20.0, right: 20.0),
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                  ),
+                )
+              ];
+            },
+            body: ListView(
+              padding: const EdgeInsets.only(
+                left: 20.0,
+                top: 20.0,
+                right: 20.0,
+              ),
+              shrinkWrap: true,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: 30.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Card(
-                        color: primaryColor,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.0)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 2.0),
-                              Text(_restaurantDetail.rating.toString(),
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 16.0)),
-                              const SizedBox(width: 3.0),
-                            ],
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Icon(
+                            Icons.pin_drop_outlined,
+                            size: 24.0,
+                            color: Colors.red.shade500,
+                          ),
+                          const SizedBox(
+                            width: 4.0,
+                          ),
+                          Text(
+                            '${data.restaurant.address}, ',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            data.restaurant.city,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      Text(
+                        data.restaurant.description,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      const Text(
+                        'Categories',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      Wrap(
+                        spacing: 4.0,
+                        children: List.generate(
+                          data.restaurant.categories.length,
+                          (index) => Text(
+                            index == data.restaurant.categories.length - 1
+                                ? data.restaurant.categories[index].name
+                                : '${data.restaurant.categories[index].name}, ',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 16.0,
+                            ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 30.0),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Description',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            height: 20.0,
-                          ),
-                          Text(
-                            widget.restaurants.description,
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 16.0),
-                          ),
-                          const SizedBox(height: 30.0),
-                          const Text(
-                            'Foods',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            height: 20.0,
-                          ),
-                          SizedBox(
-                            height: 150,
-                            width: double.infinity,
-                            child: GridView.count(
-                              crossAxisCount: 1,
-                              scrollDirection: Axis.horizontal,
-                              children: List.generate(
-                                  widget.restaurants.menus.foods.length,
-                                  (index) {
-                                return Card(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(30.0)),
-                                  child: SizedBox(
-                                    width: 150.0,
-                                    height: 150.0,
-                                    child:
-                                        Stack(fit: StackFit.expand, children: [
-                                      ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(30.0),
-                                          child: Image.asset(
-                                            "assets/images/food.jpg",
-                                            fit: BoxFit.cover,
-                                          )),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      const Text(
+                        'Foods',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      SizedBox(
+                        height: 150,
+                        width: double.infinity,
+                        child: GridView.count(
+                          crossAxisCount: 1,
+                          scrollDirection: Axis.horizontal,
+                          children: List.generate(
+                            data.restaurant.menus.foods.length,
+                            (index) {
+                              return Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                                child: SizedBox(
+                                  width: 150.0,
+                                  height: 150.0,
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
                                       ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(30.0),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                                begin: Alignment.bottomCenter,
-                                                end: Alignment.topCenter,
-                                                colors: <Color>[
-                                                  Colors.black.withOpacity(0.8),
-                                                  Colors.transparent
-                                                ],
-                                                tileMode: TileMode.repeated),
-                                          ),
+                                        child: Image.asset(
+                                          "assets/images/food.jpg",
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Align(
-                                          alignment: Alignment.bottomCenter,
-                                          child: Text(
-                                            widget.restaurants.menus
-                                                .foods[index].name,
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 18.0),
-                                          ),
-                                        ),
-                                      )
-                                    ]),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ),
-                          const SizedBox(height: 30.0),
-                          const Text(
-                            'Drinks',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            height: 20.0,
-                          ),
-                          SizedBox(
-                            height: 150.0,
-                            width: double.infinity,
-                            child: GridView.count(
-                              crossAxisCount: 1,
-                              scrollDirection: Axis.horizontal,
-                              children: List.generate(
-                                  widget.restaurants.menus.drinks.length,
-                                  (index) {
-                                return Card(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(30.0)),
-                                  child: SizedBox(
-                                    width: 150.0,
-                                    height: 150.0,
-                                    child:
-                                        Stack(fit: StackFit.expand, children: [
-                                      ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(30.0),
-                                          child: Image.asset(
-                                            "assets/images/drink.jpg",
-                                            fit: BoxFit.cover,
-                                          )),
                                       ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(30.0),
@@ -576,7 +211,88 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                               end: Alignment.topCenter,
                                               colors: <Color>[
                                                 Colors.black.withOpacity(0.8),
-                                                Colors.transparent
+                                                Colors.transparent,
+                                              ],
+                                              tileMode: TileMode.repeated,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: Text(
+                                            data.restaurant.menus.foods[index]
+                                                .name,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18.0,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      const Text(
+                        'Drinks',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      SizedBox(
+                        height: 150.0,
+                        width: double.infinity,
+                        child: GridView.count(
+                          crossAxisCount: 1,
+                          scrollDirection: Axis.horizontal,
+                          children: List.generate(
+                            data.restaurant.menus.drinks.length,
+                            (index) {
+                              return Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                                child: SizedBox(
+                                  width: 150.0,
+                                  height: 150.0,
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(30.0),
+                                        child: Image.asset(
+                                          "assets/images/drink.jpg",
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(30.0),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.bottomCenter,
+                                              end: Alignment.topCenter,
+                                              colors: <Color>[
+                                                Colors.black.withOpacity(0.8),
+                                                Colors.transparent,
                                               ],
                                             ),
                                           ),
@@ -587,27 +303,147 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                         child: Align(
                                           alignment: Alignment.bottomCenter,
                                           child: Text(
-                                              widget.restaurants.menus
-                                                  .drinks[index].name,
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 18.0)),
+                                            data.restaurant.menus.drinks[index]
+                                                .name,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18.0),
+                                          ),
                                         ),
                                       )
-                                    ]),
+                                    ],
                                   ),
-                                );
-                              }),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          const Text(
+                            'Reviews',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 20.0)
-                        ]),
-                  )
-                ],
-              ),
-            );*/
-          }),
+                          const SizedBox(
+                            width: 12.0,
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: secondaryColor,
+                              ),
+                              borderRadius: BorderRadius.circular(4.0),
+                            ),
+                            padding: const EdgeInsets.all(
+                              8.0,
+                            ),
+                            child: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.star_rounded,
+                                  size: 16.0,
+                                  color: secondaryColor,
+                                ),
+                                Text(
+                                  data.restaurant.rating.toString(),
+                                  style: const TextStyle(
+                                      color: secondaryColor, fontSize: 16.0),
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      ListView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: data.restaurant.customerReviews.length,
+                        itemBuilder: (
+                          context,
+                          index,
+                        ) {
+                          return Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: ListView(
+                              padding: const EdgeInsets.all(8.0),
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Text(
+                                      data.restaurant.customerReviews[index]
+                                          .name,
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      data.restaurant.customerReviews[index]
+                                          .date,
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12.0,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 10.0,
+                                ),
+                                Text(
+                                  data.restaurant.customerReviews[index].review,
+                                  style: const TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 30.0,
+                ),
+              ],
+            ),
+          );
+        } else if (state.state == ResultState.NoData) {
+          return ShowErrorWidget(
+            message: state.message,
+          );
+        } else if (state.state == ResultState.Error) {
+          return ShowErrorWidget(
+            message: state.message,
+          );
+        } else {
+          return const Center(
+            child: Text(''),
+          );
+        }
+      },
     );
   }
 
@@ -625,6 +461,15 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformWidget(androidBuilder: _buildAndroid, iosBuilder: _buildIos);
+    return ChangeNotifierProvider<RestaurantDetailProvider>(
+      create: (_) => RestaurantDetailProvider(
+        apiService: ApiService(),
+        id: widget.id,
+      ),
+      child: PlatformWidget(
+        androidBuilder: _buildAndroid,
+        iosBuilder: _buildIos,
+      ),
+    );
   }
 }

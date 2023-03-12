@@ -6,7 +6,6 @@ import 'package:restaurant_app/models/restaurant.dart';
 class RestaurantFavoriteProvider extends ChangeNotifier {
   final ApiService apiService;
 
-  // RestaurantProvider({required this.apiService}): assert(_fetchAllRestaurant);
   RestaurantFavoriteProvider({required this.apiService}) {
     _fetchFavoriteRestaurant();
   }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:restaurant_app/common/result_state.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
@@ -6,7 +8,6 @@ import 'package:restaurant_app/models/restaurant.dart';
 class RestaurantProvider extends ChangeNotifier {
   final ApiService apiService;
 
-  // RestaurantProvider({required this.apiService}): assert(_fetchAllRestaurant);
   RestaurantProvider({required this.apiService}) {
     _fetchAllRestaurant();
   }
@@ -35,6 +36,10 @@ class RestaurantProvider extends ChangeNotifier {
         notifyListeners();
         return _restaurants = restaurants;
       }
+    } on SocketException {
+      _state = ResultState.Error;
+      notifyListeners();
+      return _message = 'Error : \nYou must connect to a network';
     } catch (e) {
       _state = ResultState.Error;
       notifyListeners();

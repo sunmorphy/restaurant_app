@@ -4,15 +4,15 @@ import 'package:provider/provider.dart';
 import 'package:restaurant_app/common/result_state.dart';
 import 'package:restaurant_app/common/styles.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
-import 'package:restaurant_app/models/restaurant.dart';
-import 'package:restaurant_app/models/restaurant_search.dart';
-import 'package:restaurant_app/provider/restaurant_provider.dart';
 import 'package:restaurant_app/provider/restaurant_search_provider.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
-import 'package:restaurant_app/widgets/platform_widget.dart';
+
+import '../widgets/platform_widget.dart';
+import '../widgets/show_error_widget.dart';
 
 class SearchPage extends StatefulWidget {
   static const routeName = '/search_page';
+
   const SearchPage({Key? key}) : super(key: key);
 
   @override
@@ -20,24 +20,19 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  late Future<Restaurants> _restaurants;
-  late final List<RestaurantSearchElement> _search = [];
   final TextEditingController _controller = TextEditingController();
-  String query = '';
 
-  @override
-  void initState() {
-    super.initState();
-    _restaurants = ApiService().fetchList();
-  }
-
-  Widget _build(BuildContext context) {
+  Widget _buildSearch(BuildContext context) {
     return Scaffold(
         body: SingleChildScrollView(
       child: ListView(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(left: 20.0, top: 70.0, right: 20.0),
+        padding: const EdgeInsets.only(
+          left: 20.0,
+          top: 70.0,
+          right: 20.0,
+        ),
         children: [
           TextField(
             controller: _controller,
@@ -46,25 +41,28 @@ class _SearchPageState extends State<SearchPage> {
               border: InputBorder.none,
             ),
             onChanged: (v) {
-              setState(() {
-                query = v;
-                // onSearch(v);
-              });
+              Provider.of<RestaurantSearchProvider>(context, listen: false)
+                  .onSearch(v);
             },
           ),
-          const SizedBox(height: 10.0),
+          const SizedBox(
+            height: 10.0,
+          ),
           const Divider(
             height: 5.0,
             color: secondaryColor,
           ),
-          const SizedBox(height: 10.0),
+          const SizedBox(
+            height: 10.0,
+          ),
           const ListTile(
             title: Text(
               'Search Restaurant',
               style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold),
+                color: Colors.black,
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             subtitle: Text('Find your wanted restaurant!'),
           ),
@@ -74,199 +72,101 @@ class _SearchPageState extends State<SearchPage> {
     ));
   }
 
+  Widget _buildList(BuildContext context) {
+    return Consumer<RestaurantSearchProvider>(
+      builder: (context, state, _) {
+        if (state.state == ResultState.Loading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (state.state == ResultState.HasData) {
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: state.result.restaurants.length,
+            itemBuilder: (context, index) {
+              var restaurant = state.result.restaurants[index];
+              return ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 8.0,
+                ),
+                leading: SizedBox(
+                  width: 120,
+                  height: 100,
+                  child: Hero(
+                    tag: restaurant.pictureId,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: SizedBox.expand(
+                        child: Image.network(
+                          'https://restaurant-api.dicoding.dev/images/medium/${restaurant.pictureId}',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                title: Text(
+                  restaurant.name,
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  restaurant.city,
+                ),
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    RestaurantDetailPage.routeName,
+                    arguments: restaurant.id,
+                  );
+                },
+              );
+            },
+          );
+        } else if (state.state == ResultState.NoData) {
+          return ShowErrorWidget(
+            message: state.message,
+          );
+        } else if (state.state == ResultState.Error) {
+          return ShowErrorWidget(
+            message: state.message,
+          );
+        } else {
+          return const Center(
+            child: Text(''),
+          );
+        }
+      },
+    );
+  }
+
   Widget _buildAndroid(BuildContext context) {
     return Scaffold(
-      body: _build(context),
+      body: _buildSearch(context),
     );
   }
 
   Widget _buildIos(BuildContext context) {
     return CupertinoPageScaffold(
-      child: _build(context),
+      child: _buildSearch(context),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return PlatformWidget(androidBuilder: _buildAndroid, iosBuilder: _buildIos);
-  }
-
-  Widget _buildList(BuildContext context) {
-    _search.clear();
-    return query.isEmpty
-        ? ChangeNotifierProvider<RestaurantProvider>(
-            create: (_) => RestaurantProvider(apiService: ApiService()),
-            child: Consumer<RestaurantProvider>(builder: (context, state, _) {
-              if (state.state == ResultState.Loading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state.state == ResultState.HasData) {
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: state.result.restaurants.length,
-                  itemBuilder: (context, index) {
-                    var restaurant = state.result.restaurants[index];
-                    return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 8.0),
-                      leading: SizedBox(
-                        width: 120,
-                        height: 100,
-                        child: Hero(
-                          tag: restaurant.pictureId,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10.0),
-                            child: SizedBox.expand(
-                              child: Image.network(
-                                'https://restaurant-api.dicoding.dev/images/medium/${restaurant.pictureId}',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                        restaurant.name,
-                        style: const TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w500),
-                      ),
-                      subtitle: Text(restaurant.city),
-                      onTap: () {
-                        Navigator.pushNamed(
-                            context, RestaurantDetailPage.routeName,
-                            arguments: restaurant.id);
-                      },
-                    );
-                  },
-                );
-              } else if (state.state == ResultState.NoData) {
-                return Center(child: Text(state.message));
-              } else if (state.state == ResultState.Error) {
-                return Center(child: Text(state.message));
-              } else {
-                return const Center(child: Text(''));
-              }
-            }),
-          )
-        /*FutureBuilder(
-            future: _restaurants,
-            builder: (context, AsyncSnapshot<Restaurants> snapshot) {
-              var state = snapshot.connectionState;
-
-              if (state != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
-              } else {
-                if (snapshot.hasData) {
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: snapshot.data?.restaurants.length,
-                    itemBuilder: (context, index) {
-                      var restaurant = snapshot.data?.restaurants[index];
-                      return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 8.0),
-                        leading: SizedBox(
-                          width: 120,
-                          height: 100,
-                          child: Hero(
-                            tag: restaurant!.pictureId,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: SizedBox.expand(
-                                child: Image.network(
-                                  'https://restaurant-api.dicoding.dev/images/medium/${restaurant.pictureId}',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          restaurant.name,
-                          style: const TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.w500),
-                        ),
-                        subtitle: Text(restaurant.city),
-                        onTap: () {
-                          Navigator.pushNamed(
-                              context, RestaurantDetailPage.routeName,
-                              arguments: restaurant.id);
-                        },
-                      );
-                    },
-                  );
-                } else if (snapshot.hasError) {
-                  return Center(child: Text(snapshot.error.toString()));
-                } else {
-                  return const Text('');
-                }
-              }
-            },
-          )*/
-
-        : ChangeNotifierProvider<RestaurantSearchProvider>(
-            create: (_) => RestaurantSearchProvider(apiService: ApiService()),
-            child: Consumer<RestaurantSearchProvider>(
-                builder: (context, state, _) {
-              if (state.state == ResultState.Loading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state.state == ResultState.HasData) {
-                for (var i in state.result.restaurants) {
-                  if (i.name.toLowerCase().contains(query) ||
-                      i.city.toLowerCase().contains(query)) {
-                    _search.add(i);
-                  }
-                }
-
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _search.length,
-                  itemBuilder: (context, index) {
-                    var restaurant = _search[index];
-                    return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 8.0),
-                      leading: SizedBox(
-                        width: 120,
-                        height: 100,
-                        child: Hero(
-                          tag: restaurant.pictureId,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10.0),
-                            child: SizedBox.expand(
-                              child: Image.network(
-                                'https://restaurant-api.dicoding.dev/images/medium/${restaurant.pictureId}',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                        restaurant.name,
-                        style: const TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w500),
-                      ),
-                      subtitle: Text(restaurant.city),
-                      onTap: () {
-                        Navigator.pushNamed(
-                            context, RestaurantDetailPage.routeName,
-                            arguments: restaurant.id);
-                      },
-                    );
-                  },
-                );
-              } else if (state.state == ResultState.NoData) {
-                return Center(child: Text(state.message));
-              } else if (state.state == ResultState.Error) {
-                return Center(child: Text(state.message));
-              } else {
-                return const Center(child: Text(''));
-              }
-            }),
-          );
+    return ChangeNotifierProvider<RestaurantSearchProvider>(
+      create: (_) => RestaurantSearchProvider(
+        apiService: ApiService(),
+      ),
+      child: PlatformWidget(
+        androidBuilder: _buildAndroid,
+        iosBuilder: _buildIos,
+      ),
+    );
   }
 
   @override

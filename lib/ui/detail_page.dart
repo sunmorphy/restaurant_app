@@ -95,8 +95,7 @@ class _DetailPageState extends State<DetailPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
+                        Wrap(
                           children: [
                             Icon(
                               Icons.pin_drop_outlined,
@@ -107,15 +106,7 @@ class _DetailPageState extends State<DetailPage> {
                               width: 4.0,
                             ),
                             Text(
-                              '${data.restaurant.address}, ',
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              data.restaurant.city,
+                              '${data.restaurant.address}, ${data.restaurant.city}',
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 20.0,

@@ -67,16 +67,10 @@ class MyApp extends StatelessWidget {
       initialRoute: SplashPage.routeName,
       routes: {
         SplashPage.routeName: (context) => const SplashPage(),
-        HomePage.routeName: (context) => HomePage(
-              username: ModalRoute.of(context)?.settings.arguments as String,
-            ),
-        FavoritePage.routeName: (context) => FavoritePage(
-              username: ModalRoute.of(context)?.settings.arguments as String,
-            ),
+        HomePage.routeName: (context) => const HomePage(),
+        FavoritePage.routeName: (context) => const FavoritePage(),
         SearchPage.routeName: (context) => const SearchPage(),
-        SettingsPage.routeName: (context) => SettingsPage(
-              username: ModalRoute.of(context)?.settings.arguments as String,
-            ),
+        SettingsPage.routeName: (context) => const SettingsPage(),
         DetailPage.routeName: (context) => DetailPage(
               restaurant: ModalRoute.of(context)?.settings.arguments
                   as RestaurantElement,

@@ -12,18 +12,19 @@ import 'package:restaurant_app/ui/search_page.dart';
 import 'package:restaurant_app/ui/settings_page.dart';
 import 'package:restaurant_app/widgets/platform_widget.dart';
 import 'package:restaurant_app/widgets/restaurant_item.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/preference/preference_helper.dart';
+import '../provider/preference_provider.dart';
 import '../utils/notification_helper.dart';
 import '../widgets/empty_widget.dart';
 import '../widgets/warning_widget.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/home_page';
-  final String username;
 
   const HomePage({
     Key? key,
-    required this.username,
   }) : super(key: key);
 
   @override
@@ -34,98 +35,104 @@ class _HomePageState extends State<HomePage> {
   final NotificationHelper _notificationHelper = NotificationHelper();
 
   Widget _buildHome(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: ListView(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(left: 20.0, top: 70.0, right: 20.0),
-          children: [
-            Row(
+    return Consumer<PreferenceProvider>(
+      builder: (context, provider, _) {
+        return Scaffold(
+          body: SingleChildScrollView(
+            child: ListView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(
+                left: 20.0,
+                top: 70.0,
+                right: 20.0,
+              ),
               children: [
-                RichText(
-                  text: TextSpan(
-                    text: 'Hello ',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    children: [
-                      TextSpan(
-                        text: widget.username,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+                Row(
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        text: 'Hello ',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        children: [
+                          TextSpan(
+                            text: provider.username,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const TextSpan(
+                            text: '!',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      const TextSpan(
-                        text: '!',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.search),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          SearchPage.routeName,
+                        );
+                      },
+                    ),
+                    const SizedBox(
+                      width: 8.0,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.favorite, color: Colors.red.shade400),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          FavoritePage.routeName,
+                        );
+                      },
+                    ),
+                    const SizedBox(
+                      width: 8.0,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.settings_rounded),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          SettingsPage.routeName,
+                        );
+                      },
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                const Divider(
+                  height: 5.0,
+                  color: secondaryColor,
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                const ListTile(
+                  title: Text(
+                    'Restaurants',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+                  subtitle: Text('Here\'s restaurant recommendations for you!'),
                 ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      SearchPage.routeName,
-                    );
-                  },
-                ),
-                const SizedBox(
-                  width: 8.0,
-                ),
-                IconButton(
-                  icon: Icon(Icons.favorite, color: Colors.red.shade400),
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      FavoritePage.routeName,
-                      arguments: widget.username,
-                    );
-                  },
-                ),
-                const SizedBox(
-                  width: 8.0,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.settings_rounded),
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      SettingsPage.routeName,
-                      arguments: widget.username,
-                    );
-                  },
-                )
+                _buildList(context)
               ],
             ),
-            const SizedBox(
-              height: 10.0,
-            ),
-            const Divider(
-              height: 5.0,
-              color: secondaryColor,
-            ),
-            const SizedBox(
-              height: 10.0,
-            ),
-            const ListTile(
-              title: Text(
-                'Restaurants',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              subtitle: Text('Here\'s restaurant recommendations for you!'),
-            ),
-            _buildList(context)
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -212,10 +219,21 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<RestaurantProvider>(
-      create: (_) => RestaurantProvider(
-        apiService: ApiService(),
-      ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<PreferenceProvider>(
+          create: (_) => PreferenceProvider(
+            preferenceHelper: PreferenceHelper(
+              sharedPreferences: SharedPreferences.getInstance(),
+            ),
+          ),
+        ),
+        ChangeNotifierProvider<RestaurantProvider>(
+          create: (_) => RestaurantProvider(
+            apiService: ApiService(),
+          ),
+        ),
+      ],
       child: PlatformWidget(
         androidBuilder: _buildAndroid,
         iosBuilder: _buildIos,
@@ -226,7 +244,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _notificationHelper.configureSelectNotificationSubject(DetailPage.routeName);
+    _notificationHelper
+        .configureSelectNotificationSubject(DetailPage.routeName);
   }
 
   @override

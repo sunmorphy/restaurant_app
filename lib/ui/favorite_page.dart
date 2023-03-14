@@ -4,20 +4,21 @@ import 'package:provider/provider.dart';
 import 'package:restaurant_app/data/db/database_helper.dart';
 import 'package:restaurant_app/provider/restaurant_favorite_provider.dart';
 import 'package:restaurant_app/widgets/platform_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../common/result_state.dart';
 import '../common/styles.dart';
+import '../data/preference/preference_helper.dart';
+import '../provider/preference_provider.dart';
 import '../widgets/empty_widget.dart';
 import '../widgets/restaurant_item.dart';
 import '../widgets/warning_widget.dart';
 
 class FavoritePage extends StatefulWidget {
   static const routeName = '/favorite_page';
-  final String username;
 
   const FavoritePage({
     Key? key,
-    required this.username,
   }) : super(key: key);
 
   @override
@@ -26,58 +27,64 @@ class FavoritePage extends StatefulWidget {
 
 class _FavoritePageState extends State<FavoritePage> {
   Widget _buildFavorite(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: ListView(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(left: 20.0, top: 70.0, right: 20.0),
-          children: [
-            RichText(
-              text: TextSpan(
-                text: 'Hello ',
-                style: Theme.of(context).textTheme.bodyLarge,
-                children: [
-                  TextSpan(
-                    text: widget.username,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+    return Consumer<PreferenceProvider>(
+      builder: (context, provider, _) {
+        return Scaffold(
+          body: SingleChildScrollView(
+            child: ListView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding:
+                  const EdgeInsets.only(left: 20.0, top: 70.0, right: 20.0),
+              children: [
+                RichText(
+                  text: TextSpan(
+                    text: 'Hello ',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    children: [
+                      TextSpan(
+                        text: provider.username,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: '!',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                  const TextSpan(
-                    text: '!',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 10.0,
-            ),
-            const Divider(
-              height: 5.0,
-              color: secondaryColor,
-            ),
-            const SizedBox(
-              height: 10.0,
-            ),
-            const ListTile(
-              title: Text(
-                'Favorite Restaurants',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
                 ),
-              ),
-              subtitle: Text('Here\'s your favorite restaurants\nDon\'t forget to visit them!'),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                const Divider(
+                  height: 5.0,
+                  color: secondaryColor,
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                const ListTile(
+                  title: Text(
+                    'Favorite Restaurants',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                      'Here\'s your favorite restaurants\nDon\'t forget to visit them!'),
+                ),
+                _buildList(context)
+              ],
             ),
-            _buildList(context)
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -139,10 +146,21 @@ class _FavoritePageState extends State<FavoritePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<RestaurantFavoriteProvider>(
-      create: (_) => RestaurantFavoriteProvider(
-        databaseHelper: DatabaseHelper(),
-      ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<PreferenceProvider>(
+          create: (_) => PreferenceProvider(
+            preferenceHelper: PreferenceHelper(
+              sharedPreferences: SharedPreferences.getInstance(),
+            ),
+          ),
+        ),
+        ChangeNotifierProvider<RestaurantFavoriteProvider>(
+          create: (_) => RestaurantFavoriteProvider(
+            databaseHelper: DatabaseHelper(),
+          ),
+        ),
+      ],
       child: PlatformWidget(
         androidBuilder: _buildAndroid,
         iosBuilder: _buildIos,

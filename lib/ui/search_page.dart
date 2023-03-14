@@ -5,10 +5,11 @@ import 'package:restaurant_app/common/result_state.dart';
 import 'package:restaurant_app/common/styles.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
 import 'package:restaurant_app/provider/restaurant_search_provider.dart';
-import 'package:restaurant_app/ui/detail_page.dart';
+import 'package:restaurant_app/widgets/restaurant_item.dart';
 
+import '../widgets/empty_widget.dart';
 import '../widgets/platform_widget.dart';
-import '../widgets/show_error_widget.dart';
+import '../widgets/warning_widget.dart';
 
 class SearchPage extends StatefulWidget {
   static const routeName = '/search_page';
@@ -75,64 +76,29 @@ class _SearchPageState extends State<SearchPage> {
   Widget _buildList(BuildContext context) {
     return Consumer<RestaurantSearchProvider>(
       builder: (context, state, _) {
-        if (state.state == ResultState.Loading) {
+        if (state.state == ResultState.loading) {
           return const Center(
             child: CircularProgressIndicator(),
           );
-        } else if (state.state == ResultState.HasData) {
+        } else if (state.state == ResultState.hasData) {
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: state.result.restaurants.length,
             itemBuilder: (context, index) {
               var restaurant = state.result.restaurants[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 8.0,
-                ),
-                leading: SizedBox(
-                  width: 120,
-                  height: 100,
-                  child: Hero(
-                    tag: restaurant.pictureId,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10.0),
-                      child: SizedBox.expand(
-                        child: Image.network(
-                          'https://restaurant-api.dicoding.dev/images/medium/${restaurant.pictureId}',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                title: Text(
-                  restaurant.name,
-                  style: const TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                subtitle: Text(
-                  restaurant.city,
-                ),
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    RestaurantDetailPage.routeName,
-                    arguments: restaurant.id,
-                  );
-                },
+              return RestaurantItem(
+                restaurant: restaurant,
+                isFavoritePage: false,
               );
             },
           );
-        } else if (state.state == ResultState.NoData) {
-          return ShowErrorWidget(
+        } else if (state.state == ResultState.noData) {
+          return EmptyWidget(
             message: state.message,
           );
-        } else if (state.state == ResultState.Error) {
-          return ShowErrorWidget(
+        } else if (state.state == ResultState.error) {
+          return WarningWidget(
             message: state.message,
           );
         } else {

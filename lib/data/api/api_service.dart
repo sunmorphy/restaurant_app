@@ -20,16 +20,6 @@ class ApiService {
     }
   }
 
-  Future<Restaurants> fetchFavorite() async {
-    final response = await http.get(Uri.parse(_baseUrl + _list));
-
-    if (response.statusCode == 200) {
-      return Restaurants.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load list');
-    }
-  }
-
   Future<RestaurantDetail> fetchDetail(String id) async {
     final response = await http.get(Uri.parse(_baseUrl + _detail + id));
 

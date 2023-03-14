@@ -21,28 +21,28 @@ class RestaurantDetailProvider extends ChangeNotifier {
   late ResultState _state;
   String _message = '';
 
-  String get message => _message;
-
   RestaurantDetail get result => _restaurantDetail;
 
   ResultState get state => _state;
 
+  String get message => _message;
+
   Future<dynamic> _fetchAllRestaurant() async {
     try {
-      _state = ResultState.Loading;
+      _state = ResultState.loading;
       notifyListeners();
       final restaurant = await apiService.fetchDetail(id);
-      _state = ResultState.HasData;
+      _state = ResultState.hasData;
       notifyListeners();
       return _restaurantDetail = restaurant;
     } on SocketException {
-      _state = ResultState.Error;
+      _state = ResultState.error;
       notifyListeners();
       return _message = 'Error : \nYou must connect to a network';
     } catch (e) {
-      _state = ResultState.Error;
+      _state = ResultState.error;
       notifyListeners();
-      return _message = 'Error --> $e';
+      return _message = 'Error :\n$e';
     }
   }
 }

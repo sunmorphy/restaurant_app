@@ -5,25 +5,34 @@ import 'package:provider/provider.dart';
 import 'package:restaurant_app/common/result_state.dart';
 import 'package:restaurant_app/common/styles.dart';
 import 'package:restaurant_app/data/api/api_service.dart';
-import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/provider/restaurant_provider.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
+import 'package:restaurant_app/ui/favorite_page.dart';
 import 'package:restaurant_app/ui/search_page.dart';
+import 'package:restaurant_app/ui/settings_page.dart';
 import 'package:restaurant_app/widgets/platform_widget.dart';
+import 'package:restaurant_app/widgets/restaurant_item.dart';
 
-import '../widgets/show_error_widget.dart';
+import '../utils/notification_helper.dart';
+import '../widgets/empty_widget.dart';
+import '../widgets/warning_widget.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/home_page';
   final String username;
 
-  const HomePage({Key? key, required this.username}) : super(key: key);
+  const HomePage({
+    Key? key,
+    required this.username,
+  }) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final NotificationHelper _notificationHelper = NotificationHelper();
+
   Widget _buildHome(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
@@ -56,16 +65,38 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: Icon(Icons.favorite, color: Colors.red.shade400),
-                  onPressed: () {},
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      SearchPage.routeName,
+                    );
+                  },
                 ),
                 const SizedBox(
                   width: 8.0,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.search),
+                  icon: Icon(Icons.favorite, color: Colors.red.shade400),
                   onPressed: () {
-                    Navigator.pushNamed(context, SearchPage.routeName);
+                    Navigator.pushNamed(
+                      context,
+                      FavoritePage.routeName,
+                      arguments: widget.username,
+                    );
+                  },
+                ),
+                const SizedBox(
+                  width: 8.0,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.settings_rounded),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      SettingsPage.routeName,
+                      arguments: widget.username,
+                    );
                   },
                 )
               ],
@@ -82,14 +113,14 @@ class _HomePageState extends State<HomePage> {
             ),
             const ListTile(
               title: Text(
-                'Restaurant',
+                'Restaurants',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 24.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              subtitle: Text('Here\'s a restaurant recommendation for you!'),
+              subtitle: Text('Here\'s restaurant recommendations for you!'),
             ),
             _buildList(context)
           ],
@@ -101,7 +132,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildList(BuildContext context) {
     return Consumer<RestaurantProvider>(
       builder: (context, state, _) {
-        if (state.state == ResultState.Loading) {
+        if (state.state == ResultState.loading) {
           return const Padding(
             padding: EdgeInsets.only(
               top: 64.0,
@@ -110,22 +141,25 @@ class _HomePageState extends State<HomePage> {
               child: CircularProgressIndicator(),
             ),
           );
-        } else if (state.state == ResultState.HasData) {
+        } else if (state.state == ResultState.hasData) {
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: state.result.restaurants.length,
             itemBuilder: (context, index) {
               var restaurant = state.result.restaurants[index];
-              return _buildItemList(context, restaurant);
+              return RestaurantItem(
+                restaurant: restaurant,
+                isFavoritePage: false,
+              );
             },
           );
-        } else if (state.state == ResultState.NoData) {
-          return ShowErrorWidget(
+        } else if (state.state == ResultState.noData) {
+          return EmptyWidget(
             message: state.message,
           );
-        } else if (state.state == ResultState.Error) {
-          return ShowErrorWidget(
+        } else if (state.state == ResultState.error) {
+          return WarningWidget(
             message: state.message,
           );
         } else {
@@ -135,40 +169,6 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         }
-      },
-    );
-  }
-
-  Widget _buildItemList(BuildContext context, RestaurantElement restaurant) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 8.0,
-        vertical: 8.0,
-      ),
-      leading: SizedBox(
-        width: 120,
-        height: 100,
-        child: Hero(
-          tag: restaurant.pictureId,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
-            child: SizedBox.expand(
-              child: Image.network(
-                'https://restaurant-api.dicoding.dev/images/medium/${restaurant.pictureId}',
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        ),
-      ),
-      title: Text(
-        restaurant.name,
-        style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
-      ),
-      subtitle: Text(restaurant.city),
-      onTap: () {
-        Navigator.pushNamed(context, RestaurantDetailPage.routeName,
-            arguments: restaurant.id);
       },
     );
   }
@@ -221,5 +221,17 @@ class _HomePageState extends State<HomePage> {
         iosBuilder: _buildIos,
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _notificationHelper.configureSelectNotificationSubject(DetailPage.routeName);
+  }
+
+  @override
+  void dispose() {
+    selectNotificationSubject.close();
+    super.dispose();
   }
 }

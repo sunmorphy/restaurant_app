@@ -1,43 +1,60 @@
 import 'package:flutter/widgets.dart';
 import 'package:restaurant_app/common/result_state.dart';
-import 'package:restaurant_app/data/api/api_service.dart';
+import 'package:restaurant_app/data/db/database_helper.dart';
 import 'package:restaurant_app/models/restaurant.dart';
 
 class RestaurantFavoriteProvider extends ChangeNotifier {
-  final ApiService apiService;
+  final DatabaseHelper databaseHelper;
 
-  RestaurantFavoriteProvider({required this.apiService}) {
-    _fetchFavoriteRestaurant();
+  RestaurantFavoriteProvider({required this.databaseHelper}) {
+    getFavoriteRestaurants();
   }
 
-  late Restaurants _restaurants;
+  List<RestaurantElement> _restaurants = [];
+  ResultState _state = ResultState.loading;
   String _message = '';
-  late ResultState _state;
 
-  String get message => _message;
-
-  Restaurants get result => _restaurants;
+  List<RestaurantElement> get result => _restaurants;
 
   ResultState get state => _state;
 
-  Future<dynamic> _fetchFavoriteRestaurant() async {
+  String get message => _message;
+
+  Future<dynamic> getFavoriteRestaurants() async {
+    _restaurants = await databaseHelper.getFavorites();
+    if (_restaurants.isNotEmpty) {
+      _state = ResultState.hasData;
+    } else {
+      _state = ResultState.noData;
+      _message = 'Empty Data';
+    }
+    notifyListeners();
+  }
+
+  Future<bool> isFavorite(String id) async {
+    final favoriteRestaurant = await databaseHelper.getFavoriteById(id);
+    return favoriteRestaurant.isNotEmpty;
+  }
+
+  void addFavorite(RestaurantElement restaurant) async {
     try {
-      _state = ResultState.Loading;
-      notifyListeners();
-      final restaurants = await apiService.fetchFavorite();
-      if (restaurants.restaurants.isEmpty) {
-        _state = ResultState.NoData;
-        notifyListeners();
-        return _message = 'Empty Data';
-      } else {
-        _state = ResultState.HasData;
-        notifyListeners();
-        return _restaurants = restaurants;
-      }
+      await databaseHelper.insertFavorite(restaurant);
+      getFavoriteRestaurants();
     } catch (e) {
-      _state = ResultState.Error;
+      _state = ResultState.error;
+      _message = 'Error :\n$e';
       notifyListeners();
-      return _message = 'Error --> $e';
+    }
+  }
+
+  void removeFavorite(String id) async {
+    try {
+      await databaseHelper.deleteFavorite(id);
+      getFavoriteRestaurants();
+    } catch (e) {
+      _state = ResultState.error;
+      _message = 'Error :\n$e';
+      notifyListeners();
     }
   }
 }

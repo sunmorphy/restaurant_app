@@ -13,37 +13,37 @@ class RestaurantProvider extends ChangeNotifier {
   }
 
   late Restaurants _restaurants;
-  String _message = '';
   late ResultState _state;
-
-  String get message => _message;
+  String _message = '';
 
   Restaurants get result => _restaurants;
 
   ResultState get state => _state;
 
+  String get message => _message;
+
   Future<dynamic> _fetchAllRestaurant() async {
     try {
-      _state = ResultState.Loading;
+      _state = ResultState.loading;
       notifyListeners();
       final restaurants = await apiService.fetchList();
       if (restaurants.restaurants.isEmpty) {
-        _state = ResultState.NoData;
+        _state = ResultState.noData;
         notifyListeners();
         return _message = 'Empty Data';
       } else {
-        _state = ResultState.HasData;
+        _state = ResultState.hasData;
         notifyListeners();
         return _restaurants = restaurants;
       }
     } on SocketException {
-      _state = ResultState.Error;
+      _state = ResultState.error;
       notifyListeners();
       return _message = 'Error : \nYou must connect to a network';
     } catch (e) {
-      _state = ResultState.Error;
+      _state = ResultState.error;
       notifyListeners();
-      return _message = 'Error --> $e';
+      return _message = 'Error :\n$e';
     }
   }
 }

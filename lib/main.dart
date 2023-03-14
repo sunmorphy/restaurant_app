@@ -1,12 +1,38 @@
+import 'dart:io';
+
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:restaurant_app/common/navigation.dart';
 import 'package:restaurant_app/common/styles.dart';
+import 'package:restaurant_app/models/restaurant.dart';
 import 'package:restaurant_app/ui/detail_page.dart';
+import 'package:restaurant_app/ui/favorite_page.dart';
 import 'package:restaurant_app/ui/home_page.dart';
 import 'package:restaurant_app/ui/search_page.dart';
+import 'package:restaurant_app/ui/settings_page.dart';
 import 'package:restaurant_app/ui/splash_page.dart';
+import 'package:restaurant_app/utils/background_service.dart';
+import 'package:restaurant_app/utils/notification_helper.dart';
 
-void main() {
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final NotificationHelper _notificationHelper = NotificationHelper();
+  final BackgroundService _service = BackgroundService();
+
+  _service.initializeIsolate();
+
+  if (Platform.isAndroid) {
+    await AndroidAlarmManager.initialize();
+  }
+
+  await _notificationHelper.initNotifications(flutterLocalNotificationsPlugin);
+
   runApp(const MyApp());
 }
 
@@ -18,32 +44,42 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Restaurant App',
       theme: ThemeData(
-          useMaterial3: true,
-          primaryColor: primaryColor,
-          scaffoldBackgroundColor: Colors.white,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          textTheme: myTextTheme,
-          appBarTheme: AppBarTheme(
-              elevation: 0,
-              toolbarTextStyle:
-                  myTextTheme.apply(bodyColor: Colors.black).bodyMedium,
-              titleTextStyle:
-                  myTextTheme.apply(bodyColor: Colors.black).titleLarge),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              textStyle: const TextStyle(),
-            ),
+        useMaterial3: true,
+        primaryColor: primaryColor,
+        scaffoldBackgroundColor: Colors.white,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        textTheme: myTextTheme,
+        appBarTheme: AppBarTheme(
+          elevation: 0,
+          toolbarTextStyle:
+              myTextTheme.apply(bodyColor: Colors.black).bodyMedium,
+          titleTextStyle: myTextTheme.apply(bodyColor: Colors.black).titleLarge,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            textStyle: const TextStyle(),
           ),
-          colorScheme:
-              ColorScheme.fromSwatch().copyWith(secondary: secondaryColor)),
+        ),
+        colorScheme:
+            ColorScheme.fromSwatch().copyWith(secondary: secondaryColor),
+      ),
+      navigatorKey: navigatorKey,
       initialRoute: SplashPage.routeName,
       routes: {
         SplashPage.routeName: (context) => const SplashPage(),
         HomePage.routeName: (context) => HomePage(
-            username: ModalRoute.of(context)?.settings.arguments as String),
+              username: ModalRoute.of(context)?.settings.arguments as String,
+            ),
+        FavoritePage.routeName: (context) => FavoritePage(
+              username: ModalRoute.of(context)?.settings.arguments as String,
+            ),
         SearchPage.routeName: (context) => const SearchPage(),
-        RestaurantDetailPage.routeName: (context) => RestaurantDetailPage(
-              id: ModalRoute.of(context)?.settings.arguments as String,
+        SettingsPage.routeName: (context) => SettingsPage(
+              username: ModalRoute.of(context)?.settings.arguments as String,
+            ),
+        DetailPage.routeName: (context) => DetailPage(
+              restaurant: ModalRoute.of(context)?.settings.arguments
+                  as RestaurantElement,
             ),
       },
     );

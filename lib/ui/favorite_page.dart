@@ -1,104 +1,126 @@
-/*import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/models/restaurant.dart';
-import 'package:restaurant_app/ui/detail_page.dart';
+import 'package:provider/provider.dart';
+import 'package:restaurant_app/data/db/database_helper.dart';
+import 'package:restaurant_app/provider/restaurant_favorite_provider.dart';
 import 'package:restaurant_app/widgets/platform_widget.dart';
 
-class FavoritePage extends StatelessWidget {
+import '../common/result_state.dart';
+import '../common/styles.dart';
+import '../widgets/empty_widget.dart';
+import '../widgets/restaurant_item.dart';
+import '../widgets/warning_widget.dart';
+
+class FavoritePage extends StatefulWidget {
   static const routeName = '/favorite_page';
-  final List<Restaurants> favoriteRestaurants;
+  final String username;
 
-  const FavoritePage({Key? key, required this.favoriteRestaurants}) : super(key: key);
+  const FavoritePage({
+    Key? key,
+    required this.username,
+  }) : super(key: key);
 
+  @override
+  State<FavoritePage> createState() => _FavoritePageState();
+}
+
+class _FavoritePageState extends State<FavoritePage> {
   Widget _buildFavorite(BuildContext context) {
     return Scaffold(
-        body: SingleChildScrollView(
-      child: ListView(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(left: 20.0, top: 100.0, right: 20.0),
-        children: [
-          const ListTile(
-            title: Text(
-              'Favorite Restaurant',
-              style: TextStyle(
+      body: SingleChildScrollView(
+        child: ListView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(left: 20.0, top: 70.0, right: 20.0),
+          children: [
+            RichText(
+              text: TextSpan(
+                text: 'Hello ',
+                style: Theme.of(context).textTheme.bodyLarge,
+                children: [
+                  TextSpan(
+                    text: widget.username,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const TextSpan(
+                    text: '!',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 10.0,
+            ),
+            const Divider(
+              height: 5.0,
+              color: secondaryColor,
+            ),
+            const SizedBox(
+              height: 10.0,
+            ),
+            const ListTile(
+              title: Text(
+                'Favorite Restaurants',
+                style: TextStyle(
                   color: Colors.black,
                   fontSize: 24.0,
-                  fontWeight: FontWeight.bold),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text('Here\'s your favorite restaurants\nDon\'t forget to visit them!'),
             ),
-            subtitle: Text('Don\'t forget to visit them!'),
-          ),
-          ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: favoriteRestaurants.length,
-          itemBuilder: (context, index) {
-            if (favoriteRestaurants[index].isFavorite == false) {
-              return const Center(
-                child: Text('You haven\'t add any favorite here'),
-              );
-            }
-            return _buildItemList(context, favoriteRestaurants[index]);
-          },
-        )
-          // _buildList(context)
-        ],
-      ),
-    ));
-  }
-/*
-  Widget _buildList(BuildContext context) {
-    return FutureBuilder<String>(
-      future: DefaultAssetBundle.of(context)
-          .loadString('assets/local_restaurant.json'),
-      builder: (context, snapshot) {
-        final List<Restaurants> restaurants = parseRestaurants(snapshot.data);
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: restaurants.length,
-          itemBuilder: (context, index) {
-            if (restaurants[index].isFavorite == false) {
-              return const Center(
-                child: Text('You haven\'t add any favorite here'),
-              );
-            }
-            return _buildItemList(context, restaurants[index]);
-          },
-        );
-      },
-    );
-  }
-*/
-  Widget _buildItemList(BuildContext context, Restaurants favoriteRestaurants) {
-    return ListTile(
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      leading: SizedBox(
-        width: 110,
-        height: 120,
-        child: Hero(
-          tag: favoriteRestaurants.pictureId,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
-            child: Image.network(
-              favoriteRestaurants.pictureId,
-              fit: BoxFit.cover,
-            ),
-          ),
+            _buildList(context)
+          ],
         ),
       ),
-      title: Text(
-        favoriteRestaurants.name,
-        style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
-      ),
-      subtitle: Text(favoriteRestaurants.city),
-      onTap: () {
-        Navigator.pushNamed(context, RestaurantDetailPage.routeName,
-            arguments: favoriteRestaurants);
+    );
+  }
+
+  Widget _buildList(BuildContext context) {
+    return Consumer<RestaurantFavoriteProvider>(
+      builder: (context, state, _) {
+        if (state.state == ResultState.loading) {
+          return const Padding(
+            padding: EdgeInsets.only(
+              top: 64.0,
+            ),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (state.state == ResultState.hasData) {
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: state.result.length,
+            itemBuilder: (context, index) {
+              var restaurant = state.result[index];
+              return RestaurantItem(
+                restaurant: restaurant,
+                isFavoritePage: true,
+              );
+            },
+          );
+        } else if (state.state == ResultState.noData) {
+          return EmptyWidget(
+            message: state.message,
+          );
+        } else if (state.state == ResultState.error) {
+          return WarningWidget(
+            message: state.message,
+          );
+        } else {
+          return const Center(
+            child: Text(
+              '',
+            ),
+          );
+        }
       },
     );
   }
@@ -117,7 +139,14 @@ class FavoritePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformWidget(androidBuilder: _buildAndroid, iosBuilder: _buildIos);
+    return ChangeNotifierProvider<RestaurantFavoriteProvider>(
+      create: (_) => RestaurantFavoriteProvider(
+        databaseHelper: DatabaseHelper(),
+      ),
+      child: PlatformWidget(
+        androidBuilder: _buildAndroid,
+        iosBuilder: _buildIos,
+      ),
+    );
   }
 }
-*/
